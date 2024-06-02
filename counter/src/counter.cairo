@@ -31,8 +31,12 @@ mod Counter {
         }
 
         fn increase_counter(ref self: ContractState) {
-            let counter = self.counter.read();
-            self.counter.write(counter + 1);
+            let is_active = self.kill_switch.read().is_active(); //check if the contract is active
+
+            if is_active { // If the contract is active, increase the counter
+                let current_counter = self.counter.read();
+                self.counter.write(current_counter + 1);
+            }
         }
     }
 }
