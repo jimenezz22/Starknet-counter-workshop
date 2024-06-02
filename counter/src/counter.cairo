@@ -9,16 +9,19 @@ trait ICounter<TContractState> {
 #[starknet::contract]
 mod Counter {
     use starknet::{ContractAddress};
-    use super::ICounter;
+    use super::{ICounter};
+    use kill_switch::{IKillSwitchDispatcher, IKillSwitchDispatcherTrait}; // Import the kill switch interface
 
     #[storage]
     struct Storage {
         counter: u32,
+        kill_switch: IKillSwitchDispatcher, // Add the kill switch dispatcher to the storage
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, initial_counter: u32) {
+    fn constructor(ref self: ContractState, initial_counter: u32, kill_switch: ContractAddress) {
         self.counter.write(initial_counter);
+        self.kill_switch.write(IKillSwitchDispatcher { contract_address: kill_switch_address }); // Initialize the kill switch dispatcher
     }
 
     #[abi(embed_v0)]
