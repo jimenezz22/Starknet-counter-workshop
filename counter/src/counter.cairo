@@ -24,6 +24,17 @@ mod Counter {
         self.kill_switch.write(IKillSwitchDispatcher { contract_address: kill_switch_address }); // Initialize the kill switch dispatcher
     }
 
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        CounterIncreased: CounterIncreased,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CounterIncreased {
+        counter: u32
+    }
+
     #[abi(embed_v0)]
     impl Counter of super::ICounter<ContractState> {
         fn get_counter(self: @ContractState) -> u32 {
@@ -36,6 +47,7 @@ mod Counter {
             if is_active { // If the contract is active, increase the counter
                 let current_counter = self.counter.read();
                 self.counter.write(current_counter + 1);
+                self.emit(CounterIncreased { counter: self.counter.read() })
             }
         }
     }
