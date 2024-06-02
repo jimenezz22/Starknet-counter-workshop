@@ -7,6 +7,11 @@ trait ICounter<TContractState> {
     fn increase_counter(ref self: TContractState);
 }
 
+#[starknet::interface]
+trait IKillSwitch<TContractState> {
+    fn is_active(self: @TContractState) -> bool;
+}
+
 #[starknet::contract]
 mod Counter {
     use starknet::{ContractAddress};
@@ -46,11 +51,13 @@ mod Counter {
         fn increase_counter(ref self: ContractState) {
             let is_active = self.kill_switch.read().is_active(); //check if the contract is active
 
-            if is_active { // If the contract is active, increase the counter
-                let current_counter = self.counter.read();
-                self.counter.write(current_counter + 1);
-                self.emit(CounterIncreased { counter: self.counter.read() })
+            if (IKillSwitchDispatcher { contract_address: self.kill_switch.read()}).is_active() { //Check if the kill switch is active
+                panic!("Kill Switch is active");  //If the kill switch is active, panic
             }
+                
+            let current_counter = self.counter.read();
+            self.counter.write(current_counter + 1);
+            self.emit(CounterIncreased { counter: self.counter.read() })
         }
     }
 }
