@@ -1,11 +1,16 @@
+use starknet::ContractAddress;
 
 #[starknet::interface]
 trait ICounter<TContractState> {
     fn get_counter(self: @TContractState) -> u32;
+    fn increase_counter(ref self: TContractState);
 }
 
 #[starknet::contract]
 mod Counter {
+    use starknet::{ContractAddress};
+    use super::ICounter;
+
     #[storage]
     struct Storage {
         counter: u32,
@@ -19,7 +24,12 @@ mod Counter {
     #[abi(embed_v0)]
     impl Counter of super::ICounter<ContractState> {
         fn get_counter(self: @ContractState) -> u32 {
-            self.counter.read(||
+            self.counter.read()
+        }
+
+        fn increase_counter(ref self: ContractState) {
+            let counter = self.counter.read();
+            self.counter.write(counter + 1);
         }
     }
 }
