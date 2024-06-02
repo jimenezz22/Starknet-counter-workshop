@@ -32,6 +32,7 @@ mod Counter {
 
     #[derive(Drop, starknet::Event)]
     struct CounterIncreased {
+        #[key]
         counter: u32
     }
 
